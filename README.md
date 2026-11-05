@@ -29,9 +29,13 @@ Nothing in this repo claims that a real SMS was sent when a test number was used
 | Browser run at `http://localhost:8081` | ✅ phone-entry UI renders |
 | Send OTP against `safeskip-a2` | ❌ Firebase returned **`auth/configuration-not-found`** |
 | Real SMS sent | **No** — Firebase Auth is not initialised for this project, and Spark cannot send SMS |
+| OTP success screen captured | **No** |
+| Screen recording captured | **No** |
 | Billing/Blaze enabled | **No** |
 
 `auth/configuration-not-found` means Firebase Authentication has not been initialised for the `safeskip-a2` project (or the web API key/project pair does not match). This is a Firebase Console action — see the setup table below. It is not an app-code failure.
+
+Full report: **[`Evidence/STATUS.md`](Evidence/STATUS.md)**.
 
 Captured screenshots in `Screenshot/`:
 
@@ -168,19 +172,33 @@ Without these, Firebase returns real errors (shown by the app), such as `operati
 - Firebase phone-auth request and code confirmation **on the web build** (works with test numbers and, on Blaze, real SMS).
 - Honest errors instead of fake results on unsupported runtimes.
 
-### Evidence you must capture on your Android phone / browser
+### Evidence included in this repository
 
-1. **Screenshots** (put them in `Screenshots/`):
-   - Phone entry with `+92 300 1234567`.
-   - OTP screen after “Send OTP” (input + countdown).
-   - Success screen after entering the **Firebase test-number code**.
-   - Error state after entering a wrong code.
-2. **Screen recording** (put it in `Evidence/`):
+| File | What it proves |
+|---|---|
+| `Screenshot/00-country-picker.jpeg` | Country picker works in the running app. |
+| `Screenshot/01-phone-entry.jpeg` | Phone-entry screen renders with Pakistan +92 default. |
+| `Screenshot/04-error-state.jpeg` | Real Firebase response after Send OTP: `auth/configuration-not-found`. |
+| `Evidence/STATUS.md` | Full honest verification report: what passed, what failed, what was never captured. |
+| `Screenshot/README.md` | Screenshot checklist. |
+| `Evidence/README.md` | Screen-recording checklist. |
+
+### Evidence still to capture (requires Firebase Console setup)
+
+1. **Screenshots** (save into `Screenshot/`):
+   - `02-otp-requested.png` — OTP screen after “Send OTP” (input + 60s countdown).
+   - `03-verification-success.png` — success screen after entering the **Firebase test-number code**.
+   - `05-invalid-code-error.png` — error state after entering a wrong code.
+2. **Screen recording** (save as `Evidence/otp-demo.mp4`):
    - Enter phone number → tap **Send OTP**.
-   - Show the received code (SMS if Blaze is enabled, or the console test-number code).
+   - Show the code source (SMS if Blaze is enabled, or the console test-number code).
    - Enter it → verification succeeds.
 
-> If you use a Firebase test number, the recording must show the console-configured code and should not claim an actual SMS arrived.
+> If you use a Firebase test number, the recording must show the console-configured code and should not claim an actual SMS arrived. No OTP success, SMS receipt, or recording in this repo is fabricated — anything missing is documented as missing.
+
+### Why these are not captured yet
+
+Firebase Authentication is not initialised for `safeskip-a2`, so every Send OTP attempt returns `auth/configuration-not-found`. Nothing reaches the OTP screen. See `Evidence/STATUS.md` for the exact steps that unblock this.
 
 ---
 
@@ -188,11 +206,11 @@ Without these, Firebase returns real errors (shown by the app), such as `operati
 
 Repository: **https://github.com/muhammadalisajjad-dev/Quiz4-PhoneOTP-i230110**
 
-Commit and push after adding screenshots and the recording:
+Commit and push after adding the remaining screenshots and the recording:
 
 ```bash
-git add Screenshots Evidence
-git commit -m "Add OTP demo screenshots and recording"
+git add Screenshot Evidence
+git commit -m "Add remaining OTP screenshots and recording"
 git push origin master
 ```
 
