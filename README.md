@@ -119,8 +119,29 @@ npx expo start
 ```
 
 - **Browser (recommended for the phone-auth demo):** press `w` or run `npx expo start --web`. Firebase JS Phone Auth uses reCAPTCHA, which needs a browser DOM.
+  - **Important:** Firebase does **not** allow `localhost` for phone authentication. A localhost web demo will fail the authorized-domain check even after Authentication is enabled. Deploy the web build to Firebase Hosting (or add a non-localhost tunnel domain to Authorized domains) — see below.
 - **Expo Go (Android/iOS):** scan the QR code. The UI and navigation work, but Firebase’s JS SDK cannot render reCAPTCHA in Expo Go. Tapping “Send OTP” on native shows an honest explanation instead of a fake success.
 - **Development build (native Android phone auth):** requires `@react-native-firebase/auth`, a `google-services.json`, and Firebase Blaze for real SMS. This is outside the free-plan demo.
+
+### Recommended hosted demo (authorized domain)
+
+Firebase Hosting gives you the already-authorized domain `safeskip-a2.web.app`:
+
+```bash
+npm install -g firebase-tools
+firebase login
+npx expo export --platform web
+
+# first time only
+firebase init hosting
+#   public directory: dist
+#   single-page app: yes
+#   do not overwrite index.html
+
+firebase deploy --only hosting
+```
+
+Open `https://safeskip-a2.web.app` and complete Firebase Console setup (below). This is the most reliable path for a real phone-auth demo because the domain is already authorized.
 
 ---
 
