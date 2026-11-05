@@ -1,152 +1,162 @@
-# Phone OTP Verification App (Quiz 4)
+# Quiz 4 — Phone OTP Verification (React Native / Expo)
 
-A React Native / Expo mobile application that verifies users via SMS OTP using **Firebase Phone Authentication**.
+A complete Expo/React Native app that verifies a phone number with Firebase Phone Authentication. The flow is:
 
-## Features
+**Enter phone number → request a code → enter the code → verify with Firebase → success or error.**
 
-- Phone number entry with country‑code picker (default: Pakistan).
-- "Send OTP" initiates a Firebase phone‑auth verification request.
-- OTP entry screen for the user to paste the received code.
-- Real‑time countdown and "Resend" option.
-- Success / error screens with clear messages.
-- Ability to change the phone number and restart the flow.
-- Loading indicators and validation for all inputs.
-
-## How It Works
-
-1. **Phone Entry** – The user selects a country (dial code + national number) and taps **Send OTP**.
-2. **Firebase Verification** – Expo’s **Firebase JS SDK** calls `auth().signInWithPhoneNumber(phone, recaptchaVerifier)`. This sends a verification code via SMS (if the project has the Blaze pay‑as‑you‑go plan). For this assignment the **free Spark plan** blocks real SMS, so we rely on **Firebase predefined test phone numbers** for a genuine verification flow without incurring SMS charges.
-3. **OTP Entry** – The user types the 6‑digit code from the Firebase console (or from an actual SMS if a Blaze plan is enabled later) and taps **Verify**.
-4. **Result** – Shows a success screen on correct code or an error screen with hints.
-
-## Firebase Console Setup (Required for Real SMS)
-
-1. **Enable Phone Sign‑in** – Go to **Authentication → Sign‑in method** in the Firebase Console and enable **Phone**.
-2. **SMS Region Policy** – Optional but recommended. Set your allowed countries (e.g., `+92` for Pakistan) under **Authentication → Settings → SMS region policy**.
-3. **Authorized Domains** – Add the host you will use the app on (e.g., `exp.host/@your-username/Quiz4-PhoneOTP`). `localhost` is **not** allowed for phone auth.
-4. **Test Numbers** – For development without Blaze, add a fictional number (e.g., `+1 650‑555‑3434`) and its matching code under **Sign‑in method → Phone numbers for testing**.
-
-> **Note:** The app currently works with Firebase test numbers, so you can verify the flow without paying. If you enable Blaze, real SMS will be sent and will incur charges. No billing was enabled during this implementation.
-
-## Project Structure
-
-```
-Quiz4-PhoneOTP/
-├── .env                 # Firebase client keys (git‑ignored)
-├── .env.example         # Template for .env (includes placeholders)
-├── .gitignore           # Ignores node_modules, build artifacts, env files
-├── app.json             # Expo configuration
-├── package.json         # Dependencies (see installation instructions)
-├── tsconfig.json        # TypeScript config
-├── README.md            # This file
-├── assets/              # App icons / splash screens
-├── src/
-│   ├── app/            # Expo Router routes (screens)
-│   │   ├── _layout.tsx # Root navigator (currently just a slot)
-│   │   ├── (auth)/index.tsx      # Phone entry screen
-│   │   ├── (auth)/otp.tsx        # OTP input screen
-│   │   ├── (auth)/success.tsx    # Success after verification
-│   │   └── (auth)/error.tsx      # Error / retry screen
-│   ├── lib/            # Shared utilities, Firebase, error handling, OTP session store
-│   │   ├── firebase.ts
-│   │   ├── errors.ts
-│   │   ├── otpSession.ts
-│   │   └── countries.ts
-│   └── theme.ts        # Centralised colours and spacing
-```
-
-## Installation & Run
-
-### Prerequisites
-
-- Node.js (v22+ recommended)
-- Expo CLI (`npm install -g expo-cli`) or use the `expo` package in this repo (recommended)
-
-### Install Dependencies
-
-The project uses **Expo Install** to guarantee SDK‑compatible versions.
-
-```bash
-# From the project root
-cd Quiz4-PhoneOTP
-npx expo install
-```
-
-> **Why `npx expo install`?** It resolves versions that match the Expo SDK (currently v58) and handles native modules correctly.
-
-### Start the App
-
-#### Expo Go (Android / iOS)
-
-1. Install the **Expo Go** app on your phone.
-2. Run `npx expo start` in the terminal.
-3. Scan the QR code with Expo Go – the app will load automatically.
-
-#### Development Build (Android only – iOS requires a Mac)
-
-If you need native phone‑auth (reCAPTCHA) on Android, use a development build:
-
-```bash
-npx expo run:android   # builds an APK with Google Play Services
-```
-
-Open the generated APK on your phone and follow the same QR code steps.
-
-### Firebase Configuration
-
-1. Copy `.env.example` to `.env`:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Open **Firebase Console → Project Settings → Your apps → Web app** and copy the API key, project ID, etc. into `.env`.
-
-3. Restart the dev server (`npx expo start --clear`) after editing `.env`.
-
-### Development with Test Numbers
-
-If you cannot or do not want to enable Blaze:
-
-- In the Firebase Console, add a test phone number and verification code (see **Phone numbers for testing**).
-- In the app, the OTP screen will accept the code you configured. This is **not** a real SMS but a valid verification for development.
-
-## Screenshots & Evidence (Required for Submission)
-
-The repository now contains the **source code** and a `Screenshots/` folder (currently empty – you must fill this).
-
-### What You Must Do on Your Android Phone
-
-1. **Run the App** – Follow the "Start the App" instructions above and capture:
-   - **Screenshot 1**: Phone entry screen with a sample number (`+92 300 1234567`) selected.
-   - **Screenshot 2**: OTP screen after clicking **Send OTP** (show the 6‑digit input boxes and the countdown/resend button).
-   - **Screenshot 3**: Success screen after entering the **correct test‑number code** (e.g., `654321`).
-   - **Screenshot 4**: Error screen after typing an incorrect code.
-
-2. **Screen Recording** – Record a video of the complete flow:
-   - Enter phone number → tap **Send OTP**.
-   - Receive the verification code (either from Firebase test numbers or an actual SMS if you have Blaze).
-   - Enter the code → verification succeeds.
-
-3. Export the recording as an MP4, rename it (e.g., `otp-demo.mp4`), and place it inside `Evidence/` (create the folder) or rename accordingly.
-
-4. Add the screenshots and video to the repository **after** you have them. The GitHub submission deadline is strict – we can push updated commits later.
-
-## Building & Submission
-
-- **GitHub Repository**: https://github.com/muhammadalisajjad-dev/Quiz4-PhoneOTP
-- **Commit History** – The current commit (`9a465cd`) contains the core OTP flow, error handling, and a minimal UI.
-
-You can continue to polish the UI, add animations, or improve error messages. Every new change should be committed and pushed to the same remote.
-
-## Acknowledgements
-
-- Firebase Phone Authentication documentation and error guidance.
-- Expo Router for navigation.
-- The existing Firebase project `safeskip-a2` was reused for its client configuration (API keys only).
+No OTP is generated, faked, or checked locally. Every verification result comes from Firebase.
 
 ---
 
-*Prepared for Quiz 4 – OTP Phone Verification.*
+## ⚠️ Important: Firebase plan limitation
 
-> **Important**: This implementation works with Firebase’s free test numbers. If you enable Blaze billing, real SMS will be sent and will incur charges. No billing was enabled during this work.*
+Firebase Authentication phone SMS is **pay-as-you-go (Blaze) only**. This project was built on the free **Spark** plan, so:
+
+- Real SMS sending is **blocked by Firebase** (the UI surfaces the genuine billing error).
+- Development is done with **Firebase predefined test phone numbers**.
+- A test number verifies **genuinely through Firebase** and creates a real Firebase user, but **no SMS is delivered** — the code is the one you define in the Firebase Console.
+
+Nothing in this repo claims that a real SMS was sent when a test number was used.
+
+---
+
+## ✨ Features
+
+- Phone number entry with a country picker (Pakistan +92 is the default).
+- “Send OTP” calls Firebase `signInWithPhoneNumber`.
+- OTP screen with 6-digit input, **resend countdown (60s)**, and resend action.
+- Clear loading indicators, success screen, and detailed error messages.
+- “Change phone number” returns to the phone screen and resets the request.
+- Environment-variable based Firebase config (`.env` is git-ignored).
+- Honest error mapping for billing, quota, invalid number, wrong code, expired code, unauthorized domain, reCAPTCHA and network failures.
+
+---
+
+## 🧱 Project structure
+
+```
+Quiz4-PhoneOTP-i230110/
+├── .env.example                # Firebase config template (no real values committed)
+├── .gitignore                  # .env and build artifacts excluded
+├── app.json                    # Expo config, expo-router plugin, scheme
+├── package.json                # Dependencies + scripts
+├── tsconfig.json
+├── index.js                    # Custom entry (imports expo-router/entry)
+├── src/
+│   ├── app/
+│   │   ├── _layout.tsx         # Root layout (Slot)
+│   │   └── (auth)/
+│   │       ├── index.tsx       # Phone number entry
+│   │       ├── otp.tsx         # OTP entry + resend countdown
+│   │       ├── success.tsx     # Verified success screen
+│   │       └── error.tsx       # Failure / retry screen
+│   ├── components/
+│   │   ├── Button.tsx
+│   │   ├── CountryPickerModal.tsx
+│   │   └── MessageCard.tsx
+│   ├── lib/
+│   │   ├── countries.ts
+│   │   ├── errors.ts
+│   │   ├── firebase.ts
+│   │   ├── otpSession.ts
+│   │   └── phoneAuth.ts
+│   └── theme.ts
+└── README.md
+```
+
+---
+
+## 🚀 Run the app
+
+### 1. Install dependencies
+
+```bash
+cd Quiz4-PhoneOTP-i230110
+npm install
+```
+
+> Prefer `npx expo install --fix` if Expo reports SDK version mismatches. Expo CLI resolves SDK-compatible versions automatically.
+
+### 2. Configure Firebase
+
+```bash
+cp .env.example .env
+```
+
+Fill `.env` with the **Web app** config from:
+
+> Firebase Console → Project settings → Your apps → Web app → SDK setup and configuration
+
+Restart the dev server after changing `.env`.
+
+### 3. Start the app
+
+```bash
+npx expo start
+```
+
+- **Browser (recommended for the phone-auth demo):** press `w` or run `npx expo start --web`. Firebase JS Phone Auth uses reCAPTCHA, which needs a browser DOM.
+- **Expo Go (Android/iOS):** scan the QR code. The UI and navigation work, but Firebase’s JS SDK cannot render reCAPTCHA in Expo Go. Tapping “Send OTP” on native shows an honest explanation instead of a fake success.
+- **Development build (native Android phone auth):** requires `@react-native-firebase/auth`, a `google-services.json`, and Firebase Blaze for real SMS. This is outside the free-plan demo.
+
+---
+
+## 🔧 Firebase Console setup still required
+
+You must configure the Firebase project once:
+
+| Setting | Where | Why |
+|---|---|---|
+| Enable **Phone** sign-in | Authentication → Sign-in method | Phone provider must be enabled |
+| SMS region policy | Authentication → Settings | Allow/deny SMS regions; if a region allow-list is active, include Pakistan (+92) |
+| Authorized domains | Authentication → Settings | Add the domain hosting the web build. **localhost is not allowed for phone auth** |
+| Test phone numbers | Authentication → Sign-in method → Phone | Add a fictional number + fixed code for no-SMS development testing |
+
+Without these, Firebase returns real errors (shown by the app), such as `operation-not-allowed`, `unauthorized-domain`, or a billing restriction.
+
+---
+
+## 🧪 Testing and evidence
+
+### What works now
+
+- Full screen flow, validation, loading states, countdown, resend, change-number, success and error screens.
+- Firebase phone-auth request and code confirmation **on the web build** (works with test numbers and, on Blaze, real SMS).
+- Honest errors instead of fake results on unsupported runtimes.
+
+### Evidence you must capture on your Android phone / browser
+
+1. **Screenshots** (put them in `Screenshots/`):
+   - Phone entry with `+92 300 1234567`.
+   - OTP screen after “Send OTP” (input + countdown).
+   - Success screen after entering the **Firebase test-number code**.
+   - Error state after entering a wrong code.
+2. **Screen recording** (put it in `Evidence/`):
+   - Enter phone number → tap **Send OTP**.
+   - Show the received code (SMS if Blaze is enabled, or the console test-number code).
+   - Enter it → verification succeeds.
+
+> If you use a Firebase test number, the recording must show the console-configured code and should not claim an actual SMS arrived.
+
+---
+
+## 📤 Submission
+
+Repository: **https://github.com/muhammadalisajjad-dev/Quiz4-PhoneOTP-i230110**
+
+Commit and push after adding screenshots and the recording:
+
+```bash
+git add Screenshots Evidence
+git commit -m "Add OTP demo screenshots and recording"
+git push origin master
+```
+
+---
+
+## 🔐 Secrets
+
+- `.env` is git-ignored and is **not** in the repository.
+- `.env.example` contains placeholders only.
+- No service-account JSON or backend secrets are used.
+- `EXPO_PUBLIC_*` values are public client identifiers by design; they are still kept out of Git via `.env`.
