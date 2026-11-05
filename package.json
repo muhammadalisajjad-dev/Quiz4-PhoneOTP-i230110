@@ -25,5 +25,9 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
 }

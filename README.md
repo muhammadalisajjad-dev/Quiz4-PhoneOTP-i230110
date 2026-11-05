@@ -20,6 +20,29 @@ Nothing in this repo claims that a real SMS was sent when a test number was used
 
 ---
 
+## 🔎 Actual verification status (5 Nov 2026)
+
+| Check | Result |
+|---|---|
+| `npx tsc --noEmit` | ✅ passed |
+| `npx expo export --platform web` | ✅ passed (807 modules bundled) |
+| Browser run at `http://localhost:8081` | ✅ phone-entry UI renders |
+| Send OTP against `safeskip-a2` | ❌ Firebase returned **`auth/configuration-not-found`** |
+| Real SMS sent | **No** — Firebase Auth is not initialised for this project, and Spark cannot send SMS |
+| Billing/Blaze enabled | **No** |
+
+`auth/configuration-not-found` means Firebase Authentication has not been initialised for the `safeskip-a2` project (or the web API key/project pair does not match). This is a Firebase Console action — see the setup table below. It is not an app-code failure.
+
+Captured screenshots in `Screenshot/`:
+
+- `00-country-picker.jpeg` — genuine country picker UI.
+- `01-phone-entry.jpeg` — genuine phone-entry screen.
+- `04-error-state.jpeg` — genuine Firebase error state (`Authentication is not configured`).
+
+Screenshots for the OTP entry and success screens must be captured after Firebase Authentication is enabled and a test number is configured; see `Screenshot/README.md`.
+
+---
+
 ## ✨ Features
 
 - Phone number entry with a country picker (Pakistan +92 is the default).

@@ -41,6 +41,18 @@ export function mapAuthError(error: unknown): AppError {
         'That phone number is not valid.',
         'Check the country code and number, e.g. +92 300 1234567.',
       );
+    case 'auth/configuration-not-found':
+      return new AppError(
+        code,
+        'Firebase Authentication is not configured for this project.',
+        'Open Firebase Console → Authentication, complete the initial setup, then enable the Phone sign-in method. Also confirm the API key in .env belongs to this project.',
+      );
+    case 'auth/api-key-not-valid':
+      return new AppError(
+        code,
+        'The Firebase API key is invalid for this project.',
+        'Copy the Web app configuration from Firebase Console → Project settings → Your apps into .env.',
+      );
     case 'auth/operation-not-allowed':
       return new AppError(
         code,

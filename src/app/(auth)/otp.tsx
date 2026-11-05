@@ -137,7 +137,7 @@ export default function OtpScreen() {
               placeholderTextColor={colors.textMuted}
               keyboardType="number-pad"
               textContentType="oneTimeCode"
-              autoComplete="sms-otp",
+              autoComplete="sms-otp"
               maxLength={6}
               autoFocus
               style={styles.otpInput}
