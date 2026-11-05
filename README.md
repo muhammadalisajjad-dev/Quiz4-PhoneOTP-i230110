@@ -29,8 +29,8 @@ Nothing in this repo claims that a real SMS was sent when a test number was used
 | Browser run at `http://localhost:8081` | ✅ phone-entry UI renders |
 | Send OTP against `safeskip-a2` | ❌ Firebase returned **`auth/configuration-not-found`** |
 | Real SMS sent | **No** — Firebase Auth is not initialised for this project, and Spark cannot send SMS |
-| OTP success screen captured | **No** |
-| Screen recording captured | **No** |
+| OTP success screen captured | **No** — OTP screen never reached |
+| Browser recording | ✅ `Evidence/otp-demo.webm` — real flow ending in the Firebase error |
 | Billing/Blaze enabled | **No** |
 
 `auth/configuration-not-found` means Firebase Authentication has not been initialised for the `safeskip-a2` project (or the web API key/project pair does not match). This is a Firebase Console action — see the setup table below. It is not an app-code failure.
@@ -166,22 +166,35 @@ Without these, Firebase returns real errors (shown by the app), such as `operati
 
 ## 🧪 Testing and evidence
 
-### What works now
+### What is implemented vs. verified
 
-- Full screen flow, validation, loading states, countdown, resend, change-number, success and error screens.
-- Firebase phone-auth request and code confirmation **on the web build** (works with test numbers and, on Blaze, real SMS).
-- Honest errors instead of fake results on unsupported runtimes.
+**Implemented (code exists, bundles cleanly):** phone entry, country picker, validation, loading states, OTP screen with 60-second countdown and resend, change-number, success and error screens, and real Firebase `signInWithPhoneNumber` / `confirmation.confirm` calls.
+
+**Verified in a real browser (this repo's evidence):** app boots, phone-entry screen renders, country picker opens and selects, a number can be typed, Send OTP reaches Firebase, and Firebase returns a real `CONFIGURATION_NOT_FOUND` error.
+
+**Not verified:** OTP entry, code confirmation, and success. They cannot be reached until Firebase Authentication is initialised. No screenshot, SMS, or recording claims otherwise.
 
 ### Evidence included in this repository
 
 | File | What it proves |
 |---|---|
-| `Screenshot/00-country-picker.jpeg` | Country picker works in the running app. |
-| `Screenshot/01-phone-entry.jpeg` | Phone-entry screen renders with Pakistan +92 default. |
-| `Screenshot/04-error-state.jpeg` | Real Firebase response after Send OTP: `auth/configuration-not-found`. |
+| `Screenshot/00-country-picker.jpeg` | Country picker opens in the running app. |
+| `Screenshot/01-phone-entry.jpeg` | Phone-entry screen renders with Pakistan +92 and `3001234567` typed. |
+| `Screenshot/04-error-state.jpeg` | Real Firebase response after Send OTP: `Firebase Authentication is not configured for this project.` |
+| `Evidence/otp-demo.webm` | 26-second continuous Playwright recording of the real browser flow: open app → country picker → type number → Send OTP → actual Firebase error. |
+| `Evidence/runtime-log.txt` | Timestamped log of the session, including Firebase HTTP responses. |
+| `Evidence/capture-demo.mjs` | The Playwright script used to produce the screenshots and video. |
 | `Evidence/STATUS.md` | Full honest verification report: what passed, what failed, what was never captured. |
-| `Screenshot/README.md` | Screenshot checklist. |
-| `Evidence/README.md` | Screen-recording checklist. |
+| `Screenshot/README.md` / `Evidence/README.md` | Capture checklists. |
+
+Reproduce the capture:
+
+```bash
+npm i --no-save playwright-core
+npx playwright-core install ffmpeg
+npx expo start --web --port 8081   # in another terminal
+node Evidence/capture-demo.mjs
+```
 
 ### Evidence still to capture (requires Firebase Console setup)
 
@@ -189,12 +202,12 @@ Without these, Firebase returns real errors (shown by the app), such as `operati
    - `02-otp-requested.png` — OTP screen after “Send OTP” (input + 60s countdown).
    - `03-verification-success.png` — success screen after entering the **Firebase test-number code**.
    - `05-invalid-code-error.png` — error state after entering a wrong code.
-2. **Screen recording** (save as `Evidence/otp-demo.mp4`):
+2. **Success-flow recording** (save as `Evidence/otp-demo-success.webm`):
    - Enter phone number → tap **Send OTP**.
    - Show the code source (SMS if Blaze is enabled, or the console test-number code).
    - Enter it → verification succeeds.
 
-> If you use a Firebase test number, the recording must show the console-configured code and should not claim an actual SMS arrived. No OTP success, SMS receipt, or recording in this repo is fabricated — anything missing is documented as missing.
+> If you use a Firebase test number, the recording must show the console-configured code and should not claim an actual SMS arrived. No OTP success, SMS receipt, or verification result in this repo is fabricated — anything missing is documented as missing.
 
 ### Why these are not captured yet
 

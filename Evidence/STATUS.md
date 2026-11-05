@@ -20,8 +20,9 @@ This document reports exactly what was and was not verified. Nothing here is sim
 | Send OTP → Firebase | Filled a number and tapped **Send OTP** | ❌ **Failed** with a real Firebase error |
 | `.env` tracked in Git | `gh api .../contents/.env` | ✅ **Absent** — returns HTTP 404 |
 | Real SMS delivered | — | ❌ **No SMS was sent** |
-| OTP success screen | — | ❌ **Not captured** |
-| Screen recording | — | ❌ **Not captured** |
+| OTP success screen | — | ❌ **Not captured (not reachable)** |
+| Browser session recording | Playwright video of real Chrome | ✅ **Captured** — `Evidence/otp-demo.webm` (26 s) |
+| Capture script | `node Evidence/capture-demo.mjs` | ✅ Ran against `http://localhost:8081` |
 
 ---
 
@@ -50,6 +51,24 @@ GET https://identitytoolkit.googleapis.com/v2/recaptchaConfig?... 404
 
 which is consistent with Authentication not being initialised.
 
+### Network-level proof (captured in `Evidence/runtime-log.txt`)
+
+The Playwright session recorded Firebase's raw responses, not just the UI text:
+
+```http
+GET /v2/recaptchaConfig?clientType=CLIENT_TYPE_WEB&version=RECAPTCHA_ENTERPRISE&key=...  →  404
+{
+  "error": { "code": 404, "message": "CONFIGURATION_NOT_FOUND", "status": "NOT_FOUND" }
+}
+
+GET /v1/recaptchaParams?key=...  →  400
+{
+  "error": { "code": 400, "message": "CONFIGURATION_NOT_FOUND", "domain": "global", "reason": "invalid" }
+}
+```
+
+Firebase itself rejected the request before any code could be sent.
+
 ---
 
 ## Why no SMS was sent
@@ -70,6 +89,9 @@ No OTP was invented, hardcoded, or validated locally at any point.
 | `Screenshot/01-phone-entry.jpeg` | Phone-entry screen, Pakistan +92 default, running app. |
 | `Screenshot/04-error-state.jpeg` | Real Firebase `auth/configuration-not-found` error after tapping Send OTP. |
 | `Screenshot/README.md` | Screenshot checklist and remaining capture instructions. |
+| `Evidence/otp-demo.webm` | 26-second continuous Playwright recording of the real flow: open app → country picker → type `3001234567` → Send OTP → actual Firebase error. |
+| `Evidence/runtime-log.txt` | Timestamped capture log with Firebase network responses, including `CONFIGURATION_NOT_FOUND`. |
+| `Evidence/capture-demo.mjs` | The script used to capture the screenshots and video, for reproducibility. |
 | `Evidence/README.md` | Screen-recording checklist. |
 | `Evidence/STATUS.md` | This document. |
 
@@ -82,7 +104,7 @@ No OTP was invented, hardcoded, or validated locally at any point.
 | OTP entry screen screenshot (`02`) | Send OTP never succeeded, so the app never navigated to the OTP screen. |
 | Success screen screenshot (`03`) | No verification could complete against Firebase. |
 | Wrong-code error screenshot (`05`) | Requires a successful verification session first. |
-| Screen recording (`Evidence/otp-demo.mp4`) | The full flow cannot complete until Firebase is configured. |
+| Success-flow recording | The full success flow cannot complete until Firebase is configured; `Evidence/otp-demo.webm` records the available flow ending in the real Firebase error. |
 
 These are intentionally absent rather than fabricated.
 
