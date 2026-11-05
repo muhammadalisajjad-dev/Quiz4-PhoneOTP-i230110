@@ -81,14 +81,20 @@ export function mapAuthError(error: unknown): AppError {
       return new AppError(
         code,
         'The reCAPTCHA security check failed.',
-        'Retry from a normal browser window; ad-blockers can block reCAPTCHA.',
+        'Retry from a normal browser window (ad-blockers can block reCAPTCHA), or on native use a Firebase predefined test phone number.',
       );
     case 'auth/missing-recaptcha-token':
     case 'auth/invalid-app-credential':
       return new AppError(
         code,
-        'The reCAPTCHA challenge could not be completed in this environment.',
-        'Expo Go (native) has no browser DOM for Firebase reCAPTCHA — run the web build for the live flow, or a development build for native.',
+        'Firebase rejected the app-verification token.',
+        'On Expo Go/native, use a Firebase predefined test phone number with its console-defined code. On web, complete the reCAPTCHA and make sure the domain is authorized (localhost is not allowed for phone auth).',
+      );
+    case 'auth/operation-not-supported-in-this-environment':
+      return new AppError(
+        code,
+        'Firebase phone auth is not supported in this runtime.',
+        'Use the web build, or a development build with @react-native-firebase/auth for native phone auth.',
       );
     case 'auth/invalid-verification-code':
       return new AppError(code, 'The code you entered is incorrect.', 'Re-enter the 6-digit code from the SMS (or the Firebase test-number code).');

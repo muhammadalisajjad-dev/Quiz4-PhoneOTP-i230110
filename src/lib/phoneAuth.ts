@@ -1,63 +1,72 @@
 import { Platform } from 'react-native';
-import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
+import * as firebaseAuth from 'firebase/auth';
+import type { ConfirmationResult } from 'firebase/auth';
 import { auth, firebaseInitError } from './firebase';
 import { AppError, mapAuthError } from './errors';
 
 const RECAPTCHA_CONTAINER_ID = 'quiz4-recaptcha-container';
-let verifier: RecaptchaVerifier | null = null;
+const FAKE_RECAPTCHA_TOKEN = 'NO_RECAPTCHA';
+let verifier: any = null;
 
 function requireAuth() {
   if (!auth) {
     throw new AppError('firebase-not-configured', firebaseInitError ?? 'Firebase is not configured.');
   }
-  return auth;
+  return auth as any;
 }
 
 /**
- * Firebase JS Phone Auth needs a browser DOM for reCAPTCHA.
- * - Web: creates an invisible reCAPTCHA verifier bound to a container div.
- * - Native (Expo Go / React Native): Firebase's JS SDK cannot render reCAPTCHA,
- *   so we throw an honest error instead of pretending an SMS was requested.
+ * Web: real invisible reCAPTCHA via the Firebase JS SDK.
+ * Native: Firebase's JS phone-auth build cannot render reCAPTCHA, so we use
+ * Firebase's documented testing mode (appVerificationDisabledForTesting) plus a
+ * minimal ApplicationVerifier. Firebase only accepts this for predefined test
+ * phone numbers; real numbers still fail, which is honest and expected.
  */
-function getVerifier(): RecaptchaVerifier {
-  if (Platform.OS !== 'web') {
-    throw new AppError(
-      'native-recaptcha-unsupported',
-      'Firebase reCAPTCHA cannot run inside Expo Go or a native React Native runtime.',
-      'Run the web build (npx expo start --web) for the working phone-auth demo. For native Android OTP, use a development build with @react-native-firebase/auth (and Firebase Blaze billing for real SMS). Firebase predefined test numbers still need the console-configured code.',
-    );
+function getVerifier(): any {
+  if (Platform.OS === 'web') {
+    if (verifier) return verifier;
+
+    const authInstance = requireAuth();
+    const RecaptchaVerifierCtor = (firebaseAuth as any).RecaptchaVerifier;
+    if (!RecaptchaVerifierCtor) {
+      throw new AppError('recaptcha-unavailable', 'reCAPTCHA is unavailable in this web runtime.');
+    }
+
+    const dom = globalThis as any;
+    if (!dom.document) {
+      throw new AppError('recaptcha-unavailable', 'reCAPTCHA is unavailable because there is no browser DOM.');
+    }
+
+    let container = dom.document.getElementById(RECAPTCHA_CONTAINER_ID);
+    if (!container) {
+      container = dom.document.createElement('div');
+      container.id = RECAPTCHA_CONTAINER_ID;
+      dom.document.body.appendChild(container);
+    }
+
+    verifier = new RecaptchaVerifierCtor(authInstance, container, {
+      size: 'invisible',
+      'expired-callback': () => resetVerifier(),
+    });
+    return verifier;
   }
 
-  if (verifier) return verifier;
-
+  // Native / Expo Go — development/testing path for Firebase test numbers.
   const authInstance = requireAuth();
-  const dom = globalThis as any;
-  if (!dom.document) {
-    throw new AppError('native-recaptcha-unsupported', 'reCAPTCHA is unavailable because there is no browser DOM.');
-  }
-
-  let container = dom.document.getElementById(RECAPTCHA_CONTAINER_ID);
-  if (!container) {
-    container = dom.document.createElement('div');
-    container.id = RECAPTCHA_CONTAINER_ID;
-    dom.document.body.appendChild(container);
-  }
-
-  verifier = new RecaptchaVerifier(authInstance, container, {
-    size: 'invisible',
-    'expired-callback': () => {
-      // Force a fresh challenge next time.
-      resetVerifier();
-    },
-  });
-
-  return verifier;
+  authInstance.settings.appVerificationDisabledForTesting = true;
+  return {
+    type: 'recaptcha',
+    verify: async () => FAKE_RECAPTCHA_TOKEN,
+    _reset: () => undefined,
+    render: async () => 0,
+    clear: () => undefined,
+  };
 }
 
 export function resetVerifier(): void {
   if (!verifier) return;
   try {
-    (verifier as any).clear?.();
+    verifier.clear?.();
   } catch {
     // never let cleanup break a user-facing retry
   }
@@ -68,7 +77,7 @@ export function resetVerifier(): void {
 export async function sendOtp(phoneE164: string): Promise<ConfirmationResult> {
   const authInstance = requireAuth();
   try {
-    return await signInWithPhoneNumber(authInstance, phoneE164, getVerifier());
+    return await firebaseAuth.signInWithPhoneNumber(authInstance, phoneE164, getVerifier());
   } catch (error) {
     resetVerifier();
     throw mapAuthError(error);
