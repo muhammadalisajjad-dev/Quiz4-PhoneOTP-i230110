@@ -30,14 +30,14 @@ Nothing in this repo claims that a real SMS was sent when a test number was used
 | Phone-entry screen renders | ✅ verified |
 | Country picker selects United States +1 | ✅ verified |
 | Send OTP reaches Firebase (reCAPTCHA token obtained) | ✅ verified |
-| `POST /v1/accounts:sendVerificationCode` result | ❌ **HTTP 400 `OPERATION_NOT_ALLOWED`** — +1/US region not allowed |
-| Real SMS sent | ❌ No — Firebase blocked before sending |
-| `confirmationResult.confirm("654321")` tested | ❌ Not reachable — region blocker |
-| OTP success screen captured | ❌ Not reachable |
+| `POST /v1/accounts:sendVerificationCode` result | ✅ **Firebase accepted the test number** — OTP screen reached |
+| `confirmationResult.confirm("654321")` tested | ✅ **Genuine Firebase success** — signed-in user created |
+| OTP success screen captured | ✅ `Screenshot/03-verification-success.jpeg` |
+| Real SMS sent | ❌ **No** — Firebase test numbers deliver no SMS |
 | `.env` tracked in Git | ✅ Absent (gitignored, verified 404) |
 | Billing/Blaze enabled | ❌ No |
 
-`OPERATION_NOT_ALLOWED: SMS unable to be sent until this region enabled by the app developer.` means Phone sign-in is enabled but the United States (+1) region is not in the SMS region allow-list. Until `+1` is allowed, `confirmationResult.confirm("654321")` and the success screen cannot be reached.
+Firebase predefined test numbers verify **genuinely through Firebase** without sending an SMS — `confirmationResult.confirm("654321")` succeeded and Firebase created a signed-in user.
 
 See `Evidence/STATUS.md` for the full honest report.
 
@@ -90,7 +90,10 @@ Quiz4-PhoneOTP-i230110/
 └── Screenshot/
     ├── 00-country-picker.jpeg
     ├── 01-phone-entry.jpeg
-    └── 04-error-state.jpeg
+    ├── 02-otp-requested.jpeg
+    ├── 03-verification-success.jpeg
+    ├── 04-error-state.jpeg
+    └── 05-invalid-code-error.jpeg
 ```
 
 ---
@@ -187,9 +190,9 @@ See `Evidence/STATUS.md` for the full honest report and `Screenshot/04-error-sta
 
 **Implemented (code exists, bundles cleanly):** phone entry, country picker, validation, loading states, OTP screen with 60-second countdown and resend, change-number, success and error screens, and real Firebase `signInWithPhoneNumber` / `confirmation.confirm` calls.
 
-**Verified in a real browser (this repo's evidence):** app loads at `https://safeskip-a2.web.app`, phone-entry screen renders, country picker opens and selects United States +1, a number can be typed, Send OTP reaches Firebase via the app's real reCAPTCHA verifier, and Firebase returns a real `OPERATION_NOT_ALLOWED` error (SMS region policy blocks +1/US).
+**Verified in a real browser (this repo's evidence):** app loads at `https://safeskip-a2.web.app`, phone-entry screen renders, country picker opens and selects United States +1, a number can be typed, Send OTP reaches Firebase, OTP screen reached, and `confirmationResult.confirm("654321")` produced **genuine Firebase verification success** — a signed-in Firebase user was created.
 
-**Not verified:** OTP entry, code confirmation, and success. They cannot be reached until the SMS region policy allows United States (+1). No screenshot, SMS, or recording claims otherwise.
+**Not verified:** Real SMS delivery. Firebase predefined test numbers verify genuinely without sending an SMS. Real SMS requires the Blaze pay-as-you-go plan, which was not enabled.
 
 ### Evidence included in this repository
 
@@ -197,29 +200,26 @@ See `Evidence/STATUS.md` for the full honest report and `Screenshot/04-error-sta
 |---|---|
 | `Screenshot/00-country-picker.jpeg` | Country picker opens in the running app. |
 | `Screenshot/01-phone-entry.jpeg` | Phone-entry screen renders with Pakistan +92 and `3001234567` typed. |
-| `Screenshot/04-error-state.jpeg` | Real Firebase response after Send OTP: `OPERATION_NOT_ALLOWED` — SMS region policy blocks +1/US |
-| `Evidence/otp-demo.webm` | Continuous Playwright recording of the real browser flow: open app → country picker → type number → Send OTP → genuine Firebase error. |
+| `Screenshot/04-error-state.jpeg` | Historical: genuine Firebase `OPERATION_NOT_ALLOWED` error (earlier region-policy blocker) — preserved as troubleshooting evidence |
+| `Screenshot/02-otp-requested.jpeg` | OTP screen after Send OTP — input field + 60s resend countdown |
+| `Screenshot/03-verification-success.jpeg` | **GENUINE SUCCESS** — "Phone number verified", Firebase created a signed-in user |
+| `Screenshot/05-invalid-code-error.jpeg` | Genuine Firebase rejection of a wrong code ("The code you entered is incorrect.") |
+| `Evidence/otp-demo-success.webm` | Complete browser recording: phone entry → Send OTP → code entry → Firebase verification success |
 | `Evidence/http-verify-log.txt` | Timestamped log of the capture session, including Firebase HTTP responses. |
-| `Evidence/capture-demo.mjs` | The Playwright script used to produce the screenshots and video. |
+| `Evidence/capture-success.mjs` | The Playwright script used to capture the successful flow screenshots and video. |
 | `Evidence/STATUS.md` | Full honest verification report: what passed, what failed, what was never captured. |
 | `Screenshot/README.md` / `Evidence/README.md` | Capture checklists. |
 
-### Evidence still to capture (requires Firebase Console setup)
+### Evidence captured (complete flow verified)
 
-1. **Screenshots** (save into `Screenshot/`):
+1. **Screenshots** (in `Screenshot/`):
    - `02-otp-requested.png` — OTP screen after “Send OTP” (input + 60s countdown).
-   - `03-verification-success.png` — success screen after entering the **Firebase test-number code**.
+   - `03-verification-success.png` — **success screen** after entering the Firebase test-number code `654321`.
    - `05-invalid-code-error.png` — error state after entering a wrong code.
-2. **Success-flow recording** (save as `Evidence/otp-demo-success.webm`):
-   - Enter phone number → tap **Send OTP**.
-   - Show the code source (SMS if Blaze is enabled, or the console test-number code).
-   - Enter it → verification succeeds.
+2. **Success-flow recording** (in `Evidence/`):
+   - `otp-demo-success.webm` — complete browser recording: phone entry → Send OTP → code entry → Firebase verification success.
 
-> If you use a Firebase test number, the recording must show the console-configured code and should not claim an actual SMS arrived. No OTP success, SMS receipt, or verification result in this repo is fabricated — anything missing is documented as missing.
-
-### Why these are not captured yet
-
-Firebase blocks the `sendVerificationCode` request because the United States (+1) region is not in the SMS region allow-list. Until that policy is updated to include `+1`, Firebase will not send a code, the OTP screen is unreachable, and `confirmationResult.confirm("654321")` cannot be tested. See `Evidence/STATUS.md` for details.
+> Firebase predefined test numbers verify genuinely **without sending any SMS**. The recording shows the console-defined code `654321` and does **not** claim an actual SMS arrived. Real SMS delivery requires the Blaze pay-as-you-go plan, which was not enabled.
 
 ---
 

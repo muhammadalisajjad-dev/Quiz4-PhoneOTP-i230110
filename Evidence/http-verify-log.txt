@@ -1,8 +1,16 @@
-[2026-11-06T07:51:43.473Z] Opening https://safeskip-a2.web.app
-[2026-11-06T07:51:46.992Z] Captured 00-country-picker.jpeg
-[2026-11-06T07:51:47.497Z] Country set to United States +1
-[2026-11-06T07:51:48.769Z] Captured 01-phone-entry.jpeg
-[2026-11-06T07:51:48.769Z] Typed test number 6505553434
-[2026-11-06T07:51:49.649Z] Captured 04-error-state.jpeg
-[2026-11-06T07:51:49.649Z] Captured genuine Firebase OPERATION_NOT_ALLOWED error screen.
-[2026-11-06T07:51:50.139Z] Captured 99-final-state.jpeg
+[2026-11-06T08:23:38.147Z] Opening https://safeskip-a2.web.app
+[2026-11-06T08:23:41.881Z] Phone-entry screen rendered on hosting
+[2026-11-06T08:23:42.834Z] Captured 00-country-picker.jpeg
+[2026-11-06T08:23:43.399Z] Country set to United States +1
+[2026-11-06T08:23:44.852Z] Captured 01-phone-entry.jpeg
+[2026-11-06T08:23:44.852Z] Typed test number +16505553434
+[2026-11-06T08:23:44.853Z] Tapping Send OTP
+[2026-11-06T08:23:48.516Z] Captured 02-otp-requested.jpeg
+[2026-11-06T08:23:48.516Z] OTP screen reached — Firebase accepted the test number
+[2026-11-06T08:23:50.177Z] console.error: Failed to load resource: the server responded with a status of 400 ()
+[2026-11-06T08:23:52.661Z] Captured 05-invalid-code-error.jpeg
+[2026-11-06T08:23:52.662Z] Invalid-code error captured (genuine Firebase rejection of wrong code)
+[2026-11-06T08:23:53.690Z] Tapping Verify OTP with code 654321
+[2026-11-06T08:23:56.245Z] Captured 03-verification-success.jpeg
+[2026-11-06T08:23:56.245Z] VERIFICATION SUCCESS via confirmationResult.confirm("654321") on Firebase
+[2026-11-06T08:23:56.300Z] Captured 99-final-state.jpeg
