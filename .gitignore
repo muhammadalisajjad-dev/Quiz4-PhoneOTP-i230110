@@ -45,3 +45,8 @@ yarn-error.*
 
 # captured evidence binaries stay local until selected for submission
 Screenshot/*.tmp
+
+# Firebase CLI cache/logs
+.firebase/
+firebase-debug.log*
+ui-debug.log*

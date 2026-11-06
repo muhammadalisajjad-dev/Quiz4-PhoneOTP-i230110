@@ -1,0 +1,8 @@
+[2026-11-06T07:51:43.473Z] Opening https://safeskip-a2.web.app
+[2026-11-06T07:51:46.992Z] Captured 00-country-picker.jpeg
+[2026-11-06T07:51:47.497Z] Country set to United States +1
+[2026-11-06T07:51:48.769Z] Captured 01-phone-entry.jpeg
+[2026-11-06T07:51:48.769Z] Typed test number 6505553434
+[2026-11-06T07:51:49.649Z] Captured 04-error-state.jpeg
+[2026-11-06T07:51:49.649Z] Captured genuine Firebase OPERATION_NOT_ALLOWED error screen.
+[2026-11-06T07:51:50.139Z] Captured 99-final-state.jpeg
