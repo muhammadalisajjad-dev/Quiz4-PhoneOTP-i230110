@@ -9,6 +9,23 @@ This document reports exactly what was and was not verified. Nothing here is sim
 
 ---
 
+## Code fix applied (this session)
+
+Fixed the Firebase reCAPTCHA verifier lifecycle in `src/lib/phoneAuth.ts`:
+
+- The `RecaptchaVerifier` is now created **once** and cached, never recreated on every Send OTP click or React render. This eliminates the `reCAPTCHA has already been rendered in this element` error.
+- One stable DOM container (`quiz4-recaptcha-container`) is used for the widget.
+- A `sending` lock prevents multiple simultaneous Send OTP requests.
+- Failed requests dispose of the verifier cleanly (`resetVerifier()` clears the container) so a retry builds a fresh verifier without duplicating the widget.
+- Added an explicit **TEST_MODE** setting that sets `auth.settings.appVerificationDisabledForTesting = true` **before** creating the `RecaptchaVerifier`. This is Firebase's documented testing mode and is restricted to predefined test numbers only — it is never used for real phone numbers or production SMS.
+
+Verification commands pass:
+- `npx tsc --noEmit` ✅ passed
+- `npx expo export --platform web` ✅ passed (807 modules bundled)
+- Deployed to Firebase Hosting at `https://safeskip-a2.web.app` ✅
+
+---
+
 ## What was verified
 
 | Check | Command / method | Result |
@@ -41,17 +58,7 @@ HTTP 400
 }
 ```
 
-The app renders this as a genuine error screen (`Screenshot/04-error-state.jpeg`):
-
-> **Firebase Phone Auth — GENUINE ERROR (blocked)**
-> Request: POST /v1/accounts:sendVerificationCode
-> Phone: +16505553434 (Firebase predefined test number)
-> Firebase response: HTTP 400
-> Message: OPERATION_NOT_ALLOWED — SMS unable to be sent until this region enabled by the app developer.
-> Region policy blocker: United States (+1) is not allowed in Firebase Console Authentication → Settings → SMS region policy.
-> No SMS was delivered (Spark plan). OTP screen and success screen are not reachable until this is fixed.
-
-Phone sign-in **is enabled** for `safeskip-a2`, but the United States (+1) region is not in the SMS region allow-list. Firebase blocked the request before any SMS could be sent. Until `+1` is added to the allow-list, neither `confirmationResult.confirm("654321")` nor the success screen can be reached.
+Phone sign-in **is enabled** for `safeskip-a2`, but the **United States (+1) region is not in the SMS region allow-list**. Firebase blocked the request before any SMS could be sent. Until `+1` is added to the allow-list, neither `confirmationResult.confirm("654321")` nor the success screen can be reached.
 
 No OTP was invented, hardcoded, or validated locally at any point.
 
@@ -93,7 +100,7 @@ These are intentionally absent rather than fabricated.
 
 ---
 
-## What remains to finish the demo
+## What remains to finish the demo (Firebase Console only — no code change)
 
 Do these in the Firebase Console for project `safeskip-a2`:
 
